@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import { AppShell,Text, NavLink } from '@mantine/core';
-import { IconHome, IconUser, IconSettings } from '@tabler/icons-react';
+import { IconHome, IconUser, IconSettings, IconMapCode } from '@tabler/icons-react';
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -25,20 +25,31 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           label="Perfil"
           leftSection={<IconUser size="1rem" />}
         /> */}
-        {/* <NavLink
-          href="/settings"
-          label="Configuración"
-          leftSection={<IconSettings size="1rem" />}
-        /> */}
+       
+          <NavLink
+          href="/ui/turno"
+          label="Turnos"
+          leftSection={<IconUser size="1rem" />}
+        />
         <NavLink
           href="/ui/material"
           label="Materiales"
           leftSection={<IconSettings size="1rem" />}
         />
+      {/*   <NavLink
+          href="/ui/material/list"
+          label="Listado Materiales"
+          leftSection={<IconSettings size="1rem" />}
+        /> */}
          <NavLink
           href="/ui/donante"
           label="Donantes"
           leftSection={<IconUser size="1rem" />}
+        />
+         <NavLink
+          href="/ui/zona"
+          label="Zonas"
+          leftSection={<IconMapCode size="1rem" />}
         />
       </AppShell.Navbar>
       
