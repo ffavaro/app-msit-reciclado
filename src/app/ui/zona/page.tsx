@@ -68,7 +68,8 @@ export default function GestionZonas() {
       notifications.show({
         title: 'Error',
         message: 'El nombre de la zona es requerido',
-        color: 'red'
+        color: 'red',
+        position: 'top-right'
       });
       return;
     }
@@ -96,7 +97,7 @@ export default function GestionZonas() {
 
   return (
     <Stack p="md">
-      <Group position="apart">
+      <Group>
         <Title order={2}>Gestión de Zonas</Title>
         <Button 
           onClick={() => {
@@ -125,7 +126,7 @@ export default function GestionZonas() {
                 <Table.Td>{zona.nombre}</Table.Td>
                 <Table.Td>{zona.descripcion}</Table.Td>
                 <Table.Td>
-                  <Group spacing="xs">
+                  <Group>
                     <ActionIcon
                       color="blue"
                       onClick={() => {
@@ -178,7 +179,7 @@ export default function GestionZonas() {
             value={zonaActual.descripcion}
             onChange={(e) => setZonaActual({ ...zonaActual, descripcion: e.target.value })}
           />
-          <Group position="right">
+          <Group>
             <Button variant="outline" onClick={() => setModalOpen(false)}>
               Cancelar
             </Button>

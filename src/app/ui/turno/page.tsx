@@ -82,7 +82,8 @@ export default function GestionTurnos() {
       notifications.show({
         title: 'Error',
         message: 'Por favor complete todos los campos del material',
-        color: 'red'
+        color: 'red',
+        position: 'top-right'
       });
       return;
     }
@@ -99,7 +100,8 @@ export default function GestionTurnos() {
       notifications.show({
         title: 'Error',
         message: 'Por favor seleccione un donante y agregue al menos un material',
-        color: 'red'
+        color: 'red',
+        position: 'top-right'
       });
       return;
     }
@@ -142,7 +144,8 @@ export default function GestionTurnos() {
       notifications.show({
         title: 'Error',
         message: 'No se pudo enviar el email',
-        color: 'red'
+        color: 'red',
+        position: 'top-right'
       });
     }
     setEmailModalOpen(false);
@@ -150,7 +153,7 @@ export default function GestionTurnos() {
 
   return (
     <Stack p="md">
-      <Group position="apart">
+      <Group>
         <Title order={2}>Gestión de Turnos</Title>
         <Button onClick={() => setModalOpen(true)}>Nuevo Turno</Button>
       </Group>
