@@ -14,6 +14,7 @@ import {
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { IconEdit, IconTrash } from '@tabler/icons-react';
+import { useApi } from '@/hooks/useApi';
 
 interface Zona {
   id: number;
@@ -21,36 +22,7 @@ interface Zona {
   descripcion: string;
 }
 
-const ZONAS_EJEMPLO: Zona[] = [
-  {
-    id: 1,
-    nombre: 'Zona Capital',
-    descripcion: 'Centro de la ciudad y alrededores: Nueva Córdoba, Alberdi, Centro, Güemes'
-  },
-  {
-    id: 2,
-    nombre: 'Zona Norte',
-    descripcion: 'Incluye barrios: Rivera Indarte, Villa Belgrano, Argüello, La Calera'
-  },
-  {
-    id: 3,
-    nombre: 'Zona Sur',
-    descripcion: 'Comprende: Villa El Libertador, Santa Isabel, Residencial Sud, Deán Funes'
-  },
-  {
-    id: 4,
-    nombre: 'Zona Este',
-    descripcion: 'Abarca: San Vicente, General Pueyrredón, Primero de Mayo, Empalme'
-  },
-  {
-    id: 5,
-    nombre: 'Zona Oeste',
-    descripcion: 'Incluye: Cerro de las Rosas, Villa Cabrera, Alto Verde, Los Naranjos'
-  }
-];
-
 export default function GestionZonas() {
-  const [zonas, setZonas] = useState<Zona[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [zonaActual, setZonaActual] = useState<Zona>({
     id: 0,
@@ -58,42 +30,72 @@ export default function GestionZonas() {
     descripcion: ''
   });
 
+  const { 
+    data: zonas, 
+    loading, 
+    error,
+    fetchData,
+    createItem,
+    updateItem,
+    deleteItem 
+  } = useApi<Zona>({
+    endpoint: 'zone',
+    errorMessages: {
+      get: 'Error al cargar las zonas',
+      create: 'Error al crear la zona',
+      update: 'Error al actualizar la zona',
+      delete: 'Error al eliminar la zona'
+    }
+  });
+
   useEffect(() => {
-    // Simulamos carga inicial de datos
-    setZonas(ZONAS_EJEMPLO);
+    fetchData();
   }, []);
 
-  const handleSaveZona = () => {
+  const handleSaveZona = async () => {
     if (!zonaActual.nombre.trim()) {
       notifications.show({
         title: 'Error',
         message: 'El nombre de la zona es requerido',
-        color: 'red',
-        position: 'top-right'
+        color: 'red'
       });
       return;
     }
 
-    if (zonaActual.id === 0) {
-      // Nueva zona
-      setZonas([...zonas, { ...zonaActual, id: Date.now() }]);
-    } else {
-      // Modificar zona existente
-      setZonas(zonas.map(z => z.id === zonaActual.id ? zonaActual : z));
+    try {
+      if (zonaActual.id === 0) {
+        await createItem({
+          nombre: zonaActual.nombre,
+          descripcion: zonaActual.descripcion
+        });
+      } else {
+        await updateItem(zonaActual.id, zonaActual);
+      }
+      setModalOpen(false);
+      setZonaActual({ id: 0, nombre: '', descripcion: '' });
+    } catch (err) {
+      // Los errores ya son manejados por el hook
     }
-
-    setModalOpen(false);
-    setZonaActual({ id: 0, nombre: '', descripcion: '' });
+    finally {
+      fetchData();
+    }
   };
 
-  const handleDeleteZona = (id: number) => {
-    setZonas(zonas.filter(z => z.id !== id));
-    notifications.show({
-      title: 'Éxito',
-      message: 'Zona eliminada correctamente',
-      color: 'green'
-    });
+  const handleDeleteZona = async (id: number) => {
+    try {
+      await deleteItem(id);
+    } catch (err) {
+      // Los errores ya son manejados por el hook
+    }
   };
+
+  if (loading) {
+    return <div>Cargando...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
     <Stack p="md">

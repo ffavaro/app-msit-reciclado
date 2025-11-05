@@ -1,103 +1,215 @@
-import Image from "next/image";
+"use client";
+import React, { useState } from "react";
+import {
+  TextInput,
+  PasswordInput,
+  Button,
+  Paper,
+  Title,
+  Text,
+  Divider,
+  Stack,
+  Group,
+  Anchor,
+  Checkbox,
+  Container,
+} from "@mantine/core";
+import { IconBrandGoogle, IconRecycle } from "@tabler/icons-react";
+import { useRouter } from "next/navigation";
+export default function WastechSSOLogin() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
-export default function Home() {
+  const router = useRouter();
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      // Aquí iría tu lógica de login real
+      console.log("Logging in with:", email, password);
+
+      // Ejemplo: await loginAPI(email, password);
+
+      // Solo redirigir si el login fue exitoso
+      router.push("/ui/dashboard");
+    } catch (error) {
+      console.error("Login failed:", error);
+      // Aquí podrías mostrar un mensaje de error al usuario
+      // setError('Invalid credentials');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSSO = () => {
+    setLoading(true);
+
+    try {
+      // Aquí iría tu lógica de login real
+      console.log("Logging in with:", email, password);
+
+      // Ejemplo: await loginAPI(email, password);
+
+      // Solo redirigir si el login fue exitoso
+      router.push("/ui/dashboard");
+    } catch (error) {
+      console.error("Login failed:", error);
+      // Aquí podrías mostrar un mensaje de error al usuario
+      // setError('Invalid credentials');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: 'linear-gradient(135deg, #248b69ff 0%, #126d50ff 100%)',
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "20px",
+      }}
+    >
+      <Container size={420}>
+        <Paper
+          radius="md"
+          p="xl"
+          shadow="xl"
+          style={{ backgroundColor: "white" }}
+        >
+          {/* Logo y Header */}
+          <div style={{ textAlign: "center", marginBottom: "30px" }}>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "64px",
+                height: "64px",
+                borderRadius: "50%",
+                 background: 'linear-gradient(135deg, #248b69ff 0%, #126d50ff 100%)',
+                marginBottom: "16px",
+              }}
+            >
+              <IconRecycle size={36} color="white" />
+            </div>
+            <Title
+              order={2}
+              style={{
+                fontWeight: 700,
+                color: "#1a1a1a",
+                marginBottom: "8px",
+              }}
+            >
+              Wastech
+            </Title>
+            <Text size="sm" c="dimmed">
+              Reciclado Tecnológico
+            </Text>
+          </div>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+          {/* Botón SSO Google */}
+          <Stack gap="md" mb="xl">
+            <Button
+              leftSection={<IconBrandGoogle size={20} />}
+              variant="filled"
+              fullWidth
+              onClick={handleGoogleSSO}
+              loading={googleLoading}
+              size="md"
+              styles={{
+                root: {
+                  "&:hover": {
+                    backgroundColor: "#030303ff",
+                  },
+                },
+              }}
+            >
+              Continuar con Google
+            </Button>
+          </Stack>
+
+          <Divider
+            label="O continúa con email"
+            labelPosition="center"
+            my="lg"
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+          {/* Formulario de login */}
+          <div>
+            <Stack gap="md">
+              <TextInput
+                required
+                label="Email"
+                placeholder="tu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.currentTarget.value)}
+                radius="md"
+                size="md"
+              />
+
+              <PasswordInput
+                required
+                label="Contraseña"
+                placeholder="Tu contraseña"
+                value={password}
+                onChange={(e) => setPassword(e.currentTarget.value)}
+                radius="md"
+                size="md"
+              />
+
+              <Group justify="space-between">
+                <Checkbox
+                  label="Recordarme"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.currentTarget.checked)}
+                />
+                <Anchor size="sm" href="#" style={{ color: "#dc2626" }}>
+                  ¿Olvidaste tu contraseña?
+                </Anchor>
+              </Group>
+
+              <Button
+                onClick={handleLogin}
+                fullWidth
+                mt="md"
+                size="md"
+                loading={loading}
+                style={{
+                  background:
+                    "linear-gradient(135deg, #dc2626 0%, #991b1b 100%)",
+                }}
+              >
+                Iniciar Sesión
+              </Button>
+            </Stack>
+          </div>
+
+          {/* Footer */}
+          <Text ta="center" mt="xl" size="sm" c="dimmed">
+            ¿No tienes una cuenta?{" "}
+            <Anchor
+              size="sm"
+              href="#"
+              style={{ color: "#dc2626", fontWeight: 600 }}
+            >
+              Regístrate
+            </Anchor>
+          </Text>
+        </Paper>
+
+        {/* Copyright */}
+        <Text ta="center" mt="md" size="xs" c="white">
+          © 2025 Wastech. Todos los derechos reservados.
+        </Text>
+      </Container>
     </div>
   );
 }

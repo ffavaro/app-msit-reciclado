@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   AppShell,
   Container,
@@ -31,6 +31,7 @@ import {
   IconCheck,
   IconX
 } from '@tabler/icons-react';
+import { useApi } from '@/hooks/useApi';
 
 interface MaterialElectronico {
   id: number;
@@ -45,40 +46,63 @@ interface MaterialElectronico {
   procesado: boolean;
 }
 
-const tiposMaterial = [
-  { value: 'computadora', label: 'Computadora' },
-  { value: 'laptop', label: 'Laptop' },
-  { value: 'celular', label: 'Celular' },
-  { value: 'tablet', label: 'Tablet' },
-  { value: 'television', label: 'Televisión' },
-  { value: 'electrodomestico', label: 'Electrodoméstico' },
-  { value: 'componente', label: 'Componente' },
-  { value: 'otro', label: 'Otro' }
-];
-
-const estadosMaterial = [
-  { value: 'excelente', label: 'Excelente' },
-  { value: 'bueno', label: 'Bueno' },
-  { value: 'regular', label: 'Regular' },
-  { value: 'malo', label: 'Malo' },
-  { value: 'no-funciona', label: 'No Funciona' }
-];
+interface TiposMateriales {
+  id: number;
+  descripcion: string;
+}
+interface EstadoMaterial {
+  id: number;
+  descripcion: string;
+}
 
 export default function MaterialElectronicoABM() {
-  const [materiales, setMateriales] = useState<MaterialElectronico[]>([
-    {
-      id: 1,
-      nombre: 'Laptop HP',
-      tipo: 'laptop',
-      marca: 'HP',
-      modelo: 'Pavilion 15',
-      estado: 'bueno',
-      peso: 2.3,
-      descripcion: 'Laptop en buen estado, pantalla funcionando',
-      fechaIngreso: '2024-01-15',
-      procesado: false
-    }
-  ]);
+  const { 
+      data: tiposMaterial, 
+      loading, 
+      error,
+      fetchData
+    } = useApi<TiposMateriales>({
+      endpoint: 'tipoMaterial',
+      errorMessages: {
+        get: 'Error al cargar las tipos de material',
+      }
+    });
+
+     const { 
+      data: estadoMaterial, 
+      loading: loadingEstados, 
+      error: errorEstados,
+      fetchData: fetchEstados
+    } = useApi<EstadoMaterial>({
+      endpoint: 'estadoMaterial',
+      errorMessages: {
+        get: 'Error al cargar las tipos de material',
+      }
+    });
+
+      const { 
+      data: materialesList, 
+      loading: loadingMateriales, 
+      error: errorMateriales,
+      fetchData: fetchMateriales,
+      createItem,
+      updateItem,
+      deleteItem 
+    } = useApi<MaterialElectronico>({
+      endpoint: 'materiales',
+      errorMessages: {
+        get: 'Error al cargar la material',
+        create: 'Error al cargar las material',
+        update: 'Error al cargar las  material',
+        delete: 'Error al cargar las material',
+      }
+    });
+
+     useEffect(() => {
+        fetchData();
+        fetchEstados();
+        fetchMateriales();
+      }, []);
 
   const [modalAbierto, setModalAbierto] = useState(false);
   const [editando, setEditando] = useState<MaterialElectronico | null>(null);
@@ -115,12 +139,14 @@ export default function MaterialElectronicoABM() {
   };
 
   const abrirModalEditar = (material: MaterialElectronico) => {
+     let tipoEdito = tiposMaterial.find(t => t.id.toString() == material.tipo)
+     let estadoEdito = estadoMaterial.find(e => e.id.toString() == material.estado)
     setFormData({
       nombre: material.nombre,
-      tipo: material.tipo,
+      tipo: tipoEdito?.descripcion || '',
       marca: material.marca,
       modelo: material.modelo,
-      estado: material.estado,
+      estado: estadoEdito?.descripcion || '',
       peso: material.peso,
       descripcion: material.descripcion,
       fechaIngreso: material.fechaIngreso
@@ -129,44 +155,95 @@ export default function MaterialElectronicoABM() {
     setModalAbierto(true);
   };
 
-  const guardarMaterial = () => {
+  const guardarMaterial = async () => {
     if (!formData.nombre || !formData.tipo || !formData.marca || !formData.estado) {
       setNotification({message: 'Por favor completa todos los campos obligatorios', type: 'error'});
       return;
     }
 
-    if (editando) {
-      setMateriales(prev => prev.map(m => 
-        m.id === editando.id 
-          ? { ...m, ...formData }
-          : m
-      ));
-      setNotification({message: 'Material actualizado exitosamente', type: 'success'});
-    } else {
-      const nuevoMaterial: MaterialElectronico = {
-        id: Date.now(),
-        ...formData,
-        procesado: false
-      };
-      setMateriales(prev => [...prev, nuevoMaterial]);
-      setNotification({message: 'Material registrado exitosamente', type: 'success'});
+    try {
+      if (editando) {
+        // Actualizar material existente
+        await updateItem(editando.id, {
+          ...formData,
+          procesado: editando.procesado
+        });
+        setNotification({message: 'Material actualizado exitosamente', type: 'success'});
+      } else {
+        // Crear nuevo material
+        await createItem({
+          ...formData,
+          procesado: false
+        });
+        setNotification({message: 'Material registrado exitosamente', type: 'success'});
+      }
+
+      setModalAbierto(false);
+      limpiarForm();
+      setEditando(null);
+      fetchMateriales(); // Recargar la lista
+    } catch (error) {
+      setNotification({
+        message: 'Error al guardar el material: ' + (error as Error).message,
+        type: 'error'
+      });
     }
-
-    setModalAbierto(false);
-    limpiarForm();
-    setEditando(null);
   };
 
-  const eliminarMaterial = (id: number) => {
-    setMateriales(prev => prev.filter(m => m.id !== id));
-    setNotification({message: 'Material eliminado', type: 'success'});
+  const eliminarMaterial = async (id: number) => {
+    try {
+      await deleteItem(id);
+      setNotification({message: 'Material eliminado exitosamente', type: 'success'});
+      fetchMateriales(); // Recargar la lista
+    } catch (error) {
+      setNotification({
+        message: 'Error al eliminar el material: ' + (error as Error).message,
+        type: 'error'
+      });
+    }
   };
 
-  const toggleProcesado = (id: number) => {
-    setMateriales(prev => prev.map(m => 
-      m.id === id ? { ...m, procesado: !m.procesado } : m
-    ));
+  const toggleProcesado = async (id: number) => {
+    const material = materialesList.find(m => m.id === id);
+    if (!material) return;
+
+    try {
+      await updateItem(id, {
+        ...material,
+        procesado: !material.procesado
+      });
+      fetchMateriales(); // Recargar la lista
+      setNotification({
+        message: `Material marcado como ${!material.procesado ? 'procesado' : 'pendiente'}`,
+        type: 'success'
+      });
+    } catch (error) {
+      setNotification({
+        message: 'Error al actualizar el estado: ' + (error as Error).message,
+        type: 'error'
+      });
+    }
   };
+
+  // Loading state handler
+  if (loadingMateriales) {
+    return (
+      <Container size="xl">
+        <Text>Cargando materiales...</Text>
+      </Container>
+    );
+  }
+
+  // Error state handler
+  if (errorMateriales) {
+    return (
+      <Container size="xl">
+        <Notification color="red" title="Error">
+          {errorMateriales}
+        </Notification>
+      </Container>
+    );
+  }
 
   const getIconoTipo = (tipo: string) => {
     switch (tipo) {
@@ -189,9 +266,9 @@ export default function MaterialElectronicoABM() {
   };
 
   // Estadísticas
-  const totalMateriales = materiales.length;
-  const materialesProcesados = materiales.filter(m => m.procesado).length;
-  const pesoTotal = materiales.reduce((sum, m) => sum + m.peso, 0);
+  const totalMateriales = materialesList.length;
+  const materialesProcesados = materialesList.filter(m => m.procesado).length;
+  const pesoTotal = materialesList.reduce((sum, m) => sum + m.peso, 0);
 
   return (
     <AppShell padding="md">
@@ -233,7 +310,7 @@ export default function MaterialElectronicoABM() {
             <Grid.Col span={4}>
               <Card withBorder>
                 <Text size="sm" c="dimmed">Peso Total (kg)</Text>
-                <Text size="xl" fw={700}>{pesoTotal.toFixed(1)}</Text>
+                <Text size="xl" fw={700}>{pesoTotal}</Text>
               </Card>
             </Grid.Col>
           </Grid>
@@ -249,12 +326,11 @@ export default function MaterialElectronicoABM() {
                   <Table.Th>Estado</Table.Th>
                   <Table.Th>Peso (kg)</Table.Th>
                   <Table.Th>Fecha Ingreso</Table.Th>
-                  <Table.Th>Estado Proceso</Table.Th>
                   <Table.Th>Acciones</Table.Th>
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
-                {materiales.map((material) => (
+                {materialesList.map((material) => (
                   <Table.Tr key={material.id}>
                     <Table.Td>
                       <Flex align="center" gap="xs">
@@ -275,16 +351,6 @@ export default function MaterialElectronicoABM() {
                     </Table.Td>
                     <Table.Td>{material.peso} kg</Table.Td>
                     <Table.Td>{material.fechaIngreso}</Table.Td>
-                    <Table.Td>
-                      <Badge 
-                        color={material.procesado ? 'green' : 'gray'} 
-                        variant="light"
-                        style={{ cursor: 'pointer' }}
-                        onClick={() => toggleProcesado(material.id)}
-                      >
-                        {material.procesado ? 'Procesado' : 'Pendiente'}
-                      </Badge>
-                    </Table.Td>
                     <Table.Td>
                       <Group gap="xs">
                         <ActionIcon 
@@ -332,7 +398,7 @@ export default function MaterialElectronicoABM() {
                 <Select
                   label="Tipo de Material"
                   placeholder="Selecciona el tipo"
-                  data={tiposMaterial}
+                  data={tiposMaterial?.map(tipo => ({ value: tipo.id.toString(), label: tipo.descripcion }))}
                   value={formData.tipo}
                   onChange={(value) => setFormData({...formData, tipo: value || ''})}
                   required
@@ -342,7 +408,7 @@ export default function MaterialElectronicoABM() {
                 <Select
                   label="Estado"
                   placeholder="Selecciona el estado"
-                  data={estadosMaterial}
+                  data={estadoMaterial?.map(tipo => ({ value: tipo.id.toString(), label: tipo.descripcion }))}
                   value={formData.estado}
                   onChange={(value) => setFormData({...formData, estado: value || ''})}
                   required
@@ -382,6 +448,7 @@ export default function MaterialElectronicoABM() {
                   type="date"
                   value={formData.fechaIngreso}
                   onChange={(e) => setFormData({...formData, fechaIngreso: e.target.value})}
+                  display={"none"}
                 />
               </Grid.Col>
               <Grid.Col span={12}>

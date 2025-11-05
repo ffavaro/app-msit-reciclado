@@ -265,8 +265,7 @@ export default function DonantesABM() {
   const totalDonacionesRealizadas = donantes.reduce((sum, d) => sum + d.totalDonaciones, 0);
 
   return (
-    <AppShell padding="md">
-      <Container size="xl">
+    <>
         {notification && (
           <Notification
             icon={notification.type === 'success' ? <IconCheck size="1.1rem" /> : <IconX size="1.1rem" />}
@@ -590,7 +589,6 @@ export default function DonantesABM() {
             </Group>
           </Stack>
         </Modal>
-      </Container>
-    </AppShell>
+    </>
   );
 }
